@@ -47,3 +47,80 @@ viewConfig:{
 			}
 		}	
 	});
+自定义分页组件
+Ext.define('Ext.ux.CusPagingToolbar', {
+	extend:'Ext.toolbar.Paging',
+	alias:'widget.CusPagingToolbar',
+	displayInfo:true,
+	prependButtons:true,
+	dock:'bottom',
+	initComponent:function(){
+		var me=this;
+		me.items=[{
+			xtype:'combobox',
+			fieldLabel:'每页显示',
+			labelWidth:80,
+			store:new KitchenSink.view.common.store.appTransStore("ACC_PAGINATION"),
+			width:180,//下拉框的宽度
+			editable:false,
+			queryMode: 'local',
+			valueField: 'TValue',
+			displayField: 'TSDesc',
+			value:'BEST',
+			//store:['5','10','20','50','100','500'],
+			listeners:{
+				afterrender:function(combo,records,eOpts){
+					var value='';
+					//请求转换值数据
+					Ext.Ajax.request({
+						//框架定义地址  相当于AfcatCC/mgptf/dispatcher
+						url:Ext.accGetGeneralURL(),
+						//参数中必须含有ajaxParams的key值
+						params:{
+							ajaxParams:'{"OperateType":"TV","fieldName":"ACC_PAGINATION"}'
+						},
+						type:'json',
+						async:false,
+						callback:function(option,sucess,response) {
+							var jsonT=Ext.decode(response.responseText);
+							var tranStore=jsonT.comContent.ACC_PAGINATION;
+							//获得最优条数
+							for(var i=0;i<tranStore.length;i++){
+								if(tranStore[i].TValue == "BEST"){
+									value=tranStore[i].TSDesc;
+								}
+							}
+						}	
+					});
+					var ownerCt=combo.ownerCt;
+					var store=ownerCt.getStore();
+					//重新排序转换值
+					combo.getStore().sort('TSDesc','ASC');
+					//将store中的pagesize赋值到下拉框
+					store.pageSize=parseInt(value);
+					store.loadPage(1);
+				},
+				'select':function(combo,records,eOpts){
+					//获取下拉框的值
+					var value=parseInt(combo.rawValue);
+					var ownerCt=combo.ownerCt;
+					var store=ownerCt.getStore();
+					//将下拉框的值赋给store的pageSize
+					store.pageSize=value;
+					//重新加载第一页
+					store.loadPage(1);
+				}
+			}
+		},{
+			xtype:'component',
+			html:'条',
+			labelWidth:20
+		}];
+		me.callParent();
+		me.on('afterrender',function(){
+			me.ownerCt.on('reconfigure',function(){
+				me.bindStore(me.ownerCt.store||'ext-empty-store',true);
+			});
+		});
+	}
+});	
