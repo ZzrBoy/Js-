@@ -1,0 +1,49 @@
+鼠标放上显示全部内容:
+	renderer:function(v,m,r){
+			var max=5;
+			m.tdAttr = 'data-qtip="'+v+'"';
+			return v.length<max?v:v.substring(0,max-3)+'...';
+		}
+单选按钮获取选中状态的值：
+var checkWay=form.getValues()['checkWay'];
+表单值改变时，提示保存
+trackRestOnload:true,//与isDirty配合使用
+viewConfig:{
+				plugins:{
+					ptype:'gridviewdragdrop',
+					dragText:'拖动进行排序'
+				},
+				listeners:{
+					drop:function(node,data,dropRec,dropPosition){
+						var store=data.view.store;
+						var option=new Array("A","B","C","D","E","F");
+						for(var i=0;i<store.getCount();i++){
+							store.getAt(i).set('accAnsOption',option[i]);
+							//store.commitChanges();
+						}
+						data.view.refresh();
+					}
+				}
+			},
+	--请求后台数据
+	//请求转换值数据
+	Ext.Ajax.request({
+		//框架定义地址  相当于AfcatCC/mgptf/dispatcher
+		url:Ext.accGetGeneralURL(),
+		//参数中必须含有ajaxParams的key值
+		params:{
+			ajaxParams:'{"OperateType":"TV","fieldName":"ACC_PAGINATION"}'
+		},
+		type:'json',
+		async:false,
+		callback:function(option,sucess,response) {
+			var jsonT=Ext.decode(response.responseText);
+			var tranStore=jsonT.comContent.ACC_PAGINATION;
+			//获得最优条数
+			for(var i=0;i<tranStore.length;i++){
+				if(tranStore[i].TValue == "BEST"){
+					value=tranStore[i].TSDesc;
+				}
+			}
+		}	
+	});
