@@ -124,3 +124,11 @@ Ext.define('Ext.ux.CusPagingToolbar', {
 		});
 	}
 });	
+---panel销毁时
+listeners:{
+		destroy:function(panel,eOpts){
+
+		}
+	},
+---Ext iframe自适应高度
+var html = "<iframe name=\"papTplIframeUnuse\" frameborder=0  src = "+url+" height=100%  width=100%></iframe>";//嵌入iframe的panel中的layout属性为'fit'	
